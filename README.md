@@ -19,7 +19,7 @@ A desktop application for managing school bus routes and schedules.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/school-bus.git
+git clone https://github.com/raiyanbinrashid1541/school-bus.git
 
 # Navigate to project directory
 cd school-bus
