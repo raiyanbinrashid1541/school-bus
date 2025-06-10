@@ -1,0 +1,19 @@
+school-bus-management/
+├── src/
+│   ├── main/                # Main process files
+│   │   ├── database/        # Database operations
+│   │   │   └── db.js
+│   │   ├── models/          # Data models
+│   │   │   └── index.js
+│   │   └── main.js          # Main Electron process
+│   ├── renderer/            # Renderer process (HTML/CSS/JS)
+│   │   ├── assets/
+│   │   ├── dashboard.html
+│   │   ├── display.html
+│   │   ├── index.html
+│   │   ├── settings.html
+│   │   └── splash.html
+│   └── preload.js           # Preload script for Electron
+├── .gitignore
+├── package.json
+└── README.md

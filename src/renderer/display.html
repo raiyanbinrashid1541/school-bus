@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বাস নির্ধারণ ডিসপ্লে</title>
+    <style>
+        @font-face {
+            font-family: 'Noto Serif Bengali';
+            src: local('Noto Serif Bengali'), 
+                 local('NotoSerifBengali'),
+                 url('assets/fonts/NotoSerifBengali-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --boys-color: #3498db;
+            --girls-color: #e84393;
+            --day-shift-color: #e67e22;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Serif Bengali', serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .shift-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .assignment-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .assignment-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .route-name {
+            font-size: 1.4rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .bus-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .bus-label {
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .bus-number {
+            font-size: 1.2rem;
+        }
+
+        .boys-bus {
+            color: var(--boys-color);
+        }
+
+        .girls-bus {
+            color: var(--girls-color);
+        }
+
+        .audio-controls {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .audio-player {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .no-assignments {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--dark);
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 2rem;
+            }
+
+            .shift-title {
+                font-size: 1.5rem;
+            }
+
+            .assignments-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="app-title">স্কুল বাস ম্যানেজমেন্ট</h1>
+            <h2 class="shift-title" id="current-shift">প্রভাতি শাখা</h2>
+        </header>
+
+        <div id="morning-shift" class="assignments-grid">
+            <!-- Morning shift assignments will be populated here -->
+    </div>
+
+        <div id="day-shift" class="assignments-grid" style="display: none;">
+            <!-- Day shift assignments will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            let currentShift = 'morning';
+            let assignments = [];
+
+            // Load initial data
+            await loadAssignments();
+
+            // Set up auto-refresh every 30 seconds
+            setInterval(loadAssignments, 30000);
+
+            // Function to load assignments
+            async function loadAssignments() {
+                try {
+                    const [morningAssignments, dayAssignments] = await Promise.all([
+                        window.electronAPI.getAssignments('morning'),
+                        window.electronAPI.getAssignments('day')
+                    ]);
+
+                    assignments = {
+                        morning: morningAssignments,
+                        day: dayAssignments
+                    };
+
+                    updateDisplay();
+                } catch (error) {
+                    console.error('Error loading assignments:', error);
+                }
+            }
+
+            // Function to update the display
+            function updateDisplay() {
+                const morningGrid = document.getElementById('morning-shift');
+                const dayGrid = document.getElementById('day-shift');
+                const shiftTitle = document.getElementById('current-shift');
+
+                // Update shift title
+                shiftTitle.textContent = currentShift === 'morning' ? 'প্রভাতি শাখা' : 'দিবা শাখা';
+
+                // Show/hide appropriate grid
+                morningGrid.style.display = currentShift === 'morning' ? 'grid' : 'none';
+                dayGrid.style.display = currentShift === 'day' ? 'grid' : 'none';
+
+                // Clear existing content
+                morningGrid.innerHTML = '';
+                dayGrid.innerHTML = '';
+
+                // Populate morning shift
+                if (assignments.morning.length === 0) {
+                    morningGrid.innerHTML = '<div class="no-assignments">কোনো নির্ধারণ নেই</div>';
+                } else {
+                    assignments.morning.forEach(assignment => {
+                        morningGrid.appendChild(createAssignmentCard(assignment, 'morning'));
+                    });
+                }
+
+                // Populate day shift
+                if (assignments.day.length === 0) {
+                    dayGrid.innerHTML = '<div class="no-assignments">কোনো নির্ধারণ নেই</div>';
+                } else {
+                    assignments.day.forEach(assignment => {
+                        dayGrid.appendChild(createAssignmentCard(assignment, 'day'));
+                    });
+                }
+            }
+
+            // Function to create assignment card
+            function createAssignmentCard(assignment, shift) {
+                const card = document.createElement('div');
+                card.className = 'assignment-card';
+
+                let content = `
+                    <div class="route-name">${assignment.route_name}</div>
+                `;
+
+                if (shift === 'morning') {
+                    content += `
+                        <div class="bus-info">
+                            <span class="bus-label">বাস নং:</span>
+                            <span class="bus-number boys-bus">${assignment.boys_bus || '-'}</span>
+                        </div>
+                    `;
+                } else {
+                    content += `
+                        <div class="bus-info">
+                            <span class="bus-label">ছাত্র বাস:</span>
+                            <span class="bus-number boys-bus">${assignment.boys_bus || '-'}</span>
+                        </div>
+                        <div class="bus-info">
+                            <span class="bus-label">ছাত্রী বাস:</span>
+                            <span class="bus-number girls-bus">${assignment.girls_bus || '-'}</span>
+                        </div>
+                    `;
+                }
+
+                if (assignment.audio_path) {
+                    content += `
+                        <div class="audio-controls">
+                            <audio controls class="audio-player" src="${assignment.audio_path}"></audio>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = content;
+                return card;
+            }
+
+            // Toggle between shifts every 30 seconds
+            setInterval(() => {
+                currentShift = currentShift === 'morning' ? 'day' : 'morning';
+                updateDisplay();
+            }, 30000);
+        });
+    </script>
+</body>
+</html>

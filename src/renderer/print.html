@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রিন্ট - স্কুল বাস ম্যানেজমেন্ট</title>
+    <style>
+        @font-face {
+            font-family: 'Noto Serif Bengali';
+            src: local('Noto Serif Bengali'), 
+                 local('NotoSerifBengali'),
+                 url('assets/fonts/NotoSerifBengali-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Serif Bengali', serif;
+        }
+
+        body {
+            background-color: white;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .app-title {
+            font-size: 24px;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .print-date {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .boys-bus {
+            color: var(--primary);
+        }
+
+        .girls-bus {
+            color: var(--danger);
+        }
+
+        .print-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        @media print {
+            .print-controls {
+                display: none;
+            }
+
+            body {
+                padding: 0;
+            }
+
+            .container {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="app-title">স্কুল বাস ম্যানেজমেন্ট</h1>
+            <div class="print-date" id="print-date"></div>
+        </header>
+
+        <div class="section">
+            <h2 class="section-title">প্রভাতি শাখা</h2>
+            <table class="table" id="morning-table">
+                <thead>
+                    <tr>
+                        <th>রাস্তার নাম</th>
+                        <th>বাস নং</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Morning shift data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">দিবা শাখা</h2>
+            <table class="table" id="day-table">
+                <thead>
+                    <tr>
+                        <th>রাস্তার নাম</th>
+                        <th>ছাত্র বাস</th>
+                        <th>ছাত্রী বাস</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Day shift data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="print-controls">
+        <button class="btn btn-primary" onclick="window.print()">প্রিন্ট করুন</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set print date
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('print-date').textContent = 
+                `প্রিন্টের তারিখ: ${now.toLocaleDateString('bn-BD', options)}`;
+
+            // Listen for print data
+            window.electronAPI.on('print-data', (data) => {
+                populateTables(data);
+            });
+        });
+
+        function populateTables(data) {
+            const morningTable = document.getElementById('morning-table').querySelector('tbody');
+            const dayTable = document.getElementById('day-table').querySelector('tbody');
+
+            // Clear existing data
+            morningTable.innerHTML = '';
+            dayTable.innerHTML = '';
+
+            // Separate data by shift
+            const morningData = data.filter(item => item.shift === 'morning');
+            const dayData = data.filter(item => item.shift === 'day');
+
+            // Populate morning shift table
+            morningData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.route_name}</td>
+                    <td class="boys-bus">${item.boys_bus || '-'}</td>
+                `;
+                morningTable.appendChild(row);
+            });
+
+            // Populate day shift table
+            dayData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.route_name}</td>
+                    <td class="boys-bus">${item.boys_bus || '-'}</td>
+                    <td class="girls-bus">${item.girls_bus || '-'}</td>
+                `;
+                dayTable.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html> 

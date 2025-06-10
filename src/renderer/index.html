@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্কুল বাস ম্যানেজমেন্ট</title>
+    <style>
+        @font-face {
+            font-family: 'Noto Serif Bengali';
+            src: local('Noto Serif Bengali'), 
+                 local('NotoSerifBengali'),
+                 url('src/renderer/assets/fonts/NotoSerifBengali-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Noto Serif Bengali';
+            src: local('Noto Serif Bengali Bold'), 
+                 local('NotoSerifBengali-Bold'),
+                 url('fonts/NotoSerifBengali-Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --boys-color: #3498db;
+            --girls-color: #e84393;
+            --day-shift-color: #e67e22;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Serif Bengali', serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+        }
+
+        .app-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-revoke {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-revoke:hover {
+            background-color: #d35400;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-day-shift {
+            background-color: var(--day-shift-color);
+            color: white;
+        }
+
+        /* Shift Tabs */
+        .shift-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .shift-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .shift-tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .nav-tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background-color: #f8f9fa;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Elements */
+        .bus-selection {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .select-box {
+            flex: 1;
+        }
+
+        .select-box label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .select-box select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: white;
+            transition: border 0.3s;
+        }
+
+        .select-box select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        /* Tables */
+        .route-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .route-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .route-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        .route-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .route-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .boys-bus {
+            color: var(--boys-color);
+            font-weight: bold;
+        }
+
+        .girls-bus {
+            color: var(--girls-color);
+            font-weight: bold;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* Audio Player */
+        .audio-player {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Settings Button Animation */
+        .settings-icon {
+            transition: transform 0.5s ease-in-out;
+            display: inline-block;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .settings-btn:hover .settings-icon {
+            animation: spin 2s infinite linear;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .bus-selection {
+                flex-direction: column;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+                border-bottom: none;
+                border-left: 2px solid #ddd;
+            }
+            
+            .nav-tab {
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
+            
+            .nav-tab.active {
+                border-left-color: var(--primary);
+                border-bottom: none;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="container">
+        <header class="header">
+            <h1 class="app-title">স্কুল বাস ম্যানেজমেন্ট</h1>
+            <div class="header-controls">
+                <button class="btn btn-revoke" id="print-btn">প্রিন্ট</button>
+                <button class="btn btn-danger" id="display-btn">ডিসপ্লে</button>
+                <div class="settings-btn" id="settings-btn">
+                    <span class="settings-icon">⚙️</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Status Message Area -->
+        <div id="status-message" class="status-message"></div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="manual">ম্যানুয়াল নির্ধারণ</div>
+            <div class="nav-tab" data-tab="auto">স্বয়ংক্রিয় নির্ধারণ</div>
+        </div>
+
+        <!-- Manual Assignment Tab -->
+        <div class="tab-content active" id="manual">
+            <!-- Shift Tabs -->
+            <div class="shift-tabs">
+                <div class="shift-tab active" data-shift="morning">প্রভাতি শাখা</div>
+                <div class="shift-tab" data-shift="day">দিবা শাখা</div>
+            </div>
+
+            <!-- Morning Shift Section -->
+            <div id="morning-shift-section">
+                <!-- Bus Selection -->
+                <div class="bus-selection">
+                    <div class="select-box">
+                        <label for="morning-stand-select">রাস্তা নির্ধারণ করুন</label>
+                        <select id="morning-stand-select">
+                            <option value="">-- রাস্তা নির্ধারণ করুন --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="select-box">
+                        <label for="morning-bus-select">বাস নির্ধারণ করুন</label>
+                        <select id="morning-bus-select">
+                            <option value="">-- বাস নির্ধারণ করুন --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Audio Preview -->
+                <div id="morning-audio-preview" style="display: none; margin-bottom: 20px;">
+                    <h3>অডিও প্রিভিউ</h3>
+                    <audio controls class="audio-player" id="morning-audio-player">
+                        আপনার ব্রাউজার অডিও এলিমেন্ট সাপোর্ট করে না।
+                    </audio>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <button class="btn btn-primary" id="morning-save-btn">সেভ করুন</button>
+                    <button class="btn btn-day-shift" id="morning-auto-assign-btn">স্বয়ংক্রিয় নির্ধারণ</button>
+                </div>
+
+                <!-- Route Table -->
+                <table class="route-table" id="morning-assignments-table">
+                    <thead>
+                        <tr>
+                            <th>স্ট্যান্ডসমূহ</th>
+                            <th>বাস নং</th>
+                            <th>অডিও</th>
+                            <th>এডিট</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Day Shift Section -->
+            <div id="day-shift-section" style="display: none;">
+                <!-- Bus Selection -->
+                <div class="bus-selection">
+                    <div class="select-box">
+                        <label for="day-stand-select">রাস্তা নির্ধারণ করুন</label>
+                        <select id="day-stand-select">
+                            <option value="">-- রাস্তা নির্ধারণ করুন --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="select-box">
+                        <label for="day-boys-bus-select">ছাত্র বাস নির্ধারণ করুন</label>
+                        <select id="day-boys-bus-select">
+                            <option value="">-- ছাত্রদের বাস নির্ধারণ করুন --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="select-box">
+                        <label for="day-girls-bus-select">ছাত্রীদের বাস নির্ধারণ করুন</label>
+                        <select id="day-girls-bus-select">
+                            <option value="">-- ছাত্রী বাস নির্ধারণ করুন --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Audio Preview -->
+                <div id="day-audio-preview" style="display: none; margin-bottom: 20px;">
+                    <h3>অডিও প্রিভিউ</h3>
+                    <audio controls class="audio-player" id="day-audio-player">
+                        আপনার ব্রাউজার অডিও এলিমেন্ট সাপোর্ট করে না।
+                    </audio>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <button class="btn btn-primary" id="day-save-btn">সেভ করুন</button>
+                    <button class="btn btn-day-shift" id="day-auto-assign-btn">স্বয়ংক্রিয় নির্ধারণ</button>
+                </div>
+
+                <!-- Route Table -->
+                <table class="route-table" id="day-assignments-table">
+                    <thead>
+                        <tr>
+                            <th>স্ট্যান্ডসমূহ</th>
+                            <th>ছাত্র বাস</th>
+                            <th>ছাত্রী বাস</th>
+                            <th>অডিও</th>
+                            <th>এডিট</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Auto Assignment Tab -->
+        <div class="tab-content" id="auto">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <button class="btn btn-day-shift" id="run-auto-assign-btn">স্বয়ংক্রিয় নির্ধারণ চালান</button>
+            </div>
+
+            <!-- Auto Assignment Results Table -->
+            <table class="route-table" id="auto-assignments-table">
+                <thead>
+                    <tr>
+                        <th>স্ট্যান্ডসমূহ</th>
+                        <th>ছাত্র (বাস নং)</th>
+                        <th>ছাত্রী (বাস নং)</th>
+                        <th>শাখা</th>
+                        <th>এডিট</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    // Add these functions to your existing JavaScript code
+
+    class BusManagementSystem {
+        constructor() {
+            this.stands = new Map();
+            this.initializeEventListeners();
+        }
+    
+        initializeEventListeners() {
+            // Toggle event listener
+            const shiftToggle = document.getElementById('shift-toggle');
+            if (shiftToggle) {
+                shiftToggle.addEventListener('change', (e) => this.handleShiftChange(e));
+            }
+    
+            // Add bus button event listener
+            const addBusBtn = document.getElementById('add-bus-btn');
+            if (addBusBtn) {
+                addBusBtn.addEventListener('click', () => this.handleAddBus());
+            }
+    
+            // Initialize tab switching
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => this.handleTabSwitch(e));
+            });
+        }
+    
+        handleShiftChange(e) {
+            const isDay = e.target.checked;
+            const currentSection = document.querySelector('.tab-content.active');
+            const tables = currentSection.querySelectorAll('.route-table');
+            
+            tables.forEach(table => {
+                table.style.display = 'none';
+            });
+    
+            const activeTable = currentSection.querySelector(
+                isDay ? '.day-shift-table' : '.morning-shift-table'
+            );
+            if (activeTable) {
+                activeTable.style.display = 'table';
+            }
+        }
+    
+        handleAddBus() {
+            const stand = document.getElementById('stand-select').value;
+            const time = document.getElementById('time-input').value;
+            const bus = document.getElementById('bus-select').value;
+            
+            if (!this.validateEntry(stand, time, bus)) {
+                return;
+            }
+    
+            this.addBusEntry(stand, time, bus);
+        }
+    
+        validateEntry(stand, time, bus) {
+            if (!stand || !time || !bus) {
+                this.showMessage('সমস্ত ক্ষেত্র পূরণ করুন।', 'error');
+                return false;
+            }
+    
+            if (this.stands.has(stand)) {
+                this.showMessage('এই স্ট্যান্ডটি ইতিমধ্যে যোগ করা হয়েছে।', 'error');
+                return false;
+            }
+    
+            return true;
+        }
+    
+        addBusEntry(stand, time, bus) {
+            const currentTable = document.querySelector('.route-table');
+            const newRow = currentTable.insertRow(-1);
+            
+            const cells = [
+                currentTable.rows.length - 1,
+                stand,
+                time,
+                bus,
+                '<button class="action-btn" onclick="busSystem.removeBusEntry(this)">❌</button>'
+            ];
+    
+            cells.forEach((content, index) => {
+                const cell = newRow.insertCell(index);
+                cell.innerHTML = content;
+            });
+    
+            this.stands.set(stand, { time, bus });
+            this.showMessage('বাস সফলভাবে যোগ করা হয়েছে।', 'success');
+            this.clearForm();
+        }
+    
+        removeBusEntry(button) {
+            const row = button.closest('tr');
+            const stand = row.cells[1].textContent;
+            
+            this.stands.delete(stand);
+            row.remove();
+            
+            this.showMessage('বাস সফলভাবে মুছে ফেলা হয়েছে।', 'success');
+        }
+    
+        handleTabSwitch(e) {
+            const tabId = e.target.getAttribute('data-tab');
+            
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            e.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            // Reset toggle when switching tabs
+            const shiftToggle = document.getElementById('shift-toggle');
+            if (shiftToggle) {
+                shiftToggle.checked = false;
+            }
+        }
+    
+        showMessage(message, type) {
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            
+            setTimeout(() => {
+                statusMessage.className = 'status-message';
+            }, 3000);
+        }
+    
+        clearForm() {
+            document.getElementById('stand-select').value = '';
+            document.getElementById('time-input').value = '';
+            document.getElementById('bus-select').value = '';
+        }
+    }
+    
+    // Initialize the system
+    const busSystem = new BusManagementSystem();
+    
+    // Add this line at the end of your existing script
+    document.addEventListener('DOMContentLoaded', () => {
+        window.busSystem = busSystem;
+    });

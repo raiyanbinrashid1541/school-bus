@@ -1,0 +1,37 @@
+{
+  "name": "school-bus",
+  "version": "1.0.0",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "npx electron .",
+    "clean": "rimraf node_modules",
+    "rebuild": "npm run clean && npm install",
+    "postinstall": "electron-builder install-app-deps",
+    "lint": "eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/school-bus.git"
+  },
+  "keywords": ["electron", "school", "bus", "management"],
+  "author": "Your Name",
+  "license": "ISC",
+  "description": "School Bus Management System",
+  "bugs": {
+    "url": "https://github.com/your-username/school-bus/issues"
+  },
+  "homepage": "https://github.com/your-username/school-bus#readme",
+  "dependencies": {
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.6",
+    "electron": "25.9.8"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.5",
+    "electron-builder": "^24.6.4"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
